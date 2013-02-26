@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "resque-delay"
-  s.version           = "0.5.1"
+  s.version           = "0.5.2"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "Enable send_later/delay for Resque"
   s.homepage          = "http://github.com/rykov/resque-delay"
