@@ -10,7 +10,7 @@ module ResqueDelay
     def method_missing(method, *args)
       queue = @options[:to] || :default
       performable_method = PerformableMethod.create(@target, method, args)
-      Resque::Job.create(queue, DelayProxy, performable_method)
+      ::Resque::Job.create(queue, DelayProxy, performable_method)
     end
 
     # Called asynchrously by Resque
