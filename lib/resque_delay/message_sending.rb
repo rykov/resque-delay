@@ -20,7 +20,7 @@ module ResqueDelay
   end
 
   module MessageSending
-    def delay_with_resque(options = {})
+    def delay(options = {})
       DelayProxy.new(self, options)
     end
   end
