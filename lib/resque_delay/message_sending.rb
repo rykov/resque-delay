@@ -30,7 +30,7 @@ module ResqueDelay
       end
 
       def delay
-        @delay ||= ::Time.now + @options[:in]
+        @delay ||= @options[:in] && (::Time.now + @options[:in])
       end
   end
 
