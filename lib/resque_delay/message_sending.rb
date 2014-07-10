@@ -26,7 +26,7 @@ module ResqueDelay
 
     private
       def delay?
-        delay.not_nil?
+        delay.to_i > 0
       end
 
       def delay
