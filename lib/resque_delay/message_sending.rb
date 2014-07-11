@@ -13,7 +13,7 @@ module ResqueDelay
       queue = @options[:to] || :default
       performable_method = PerformableMethod.create(@target, method, args)
       if delay?
-        ::Resque.enqueue_at_with_queue(queue, delay, DelayProxy, performable_method )
+        ::Resque.enqueue_in_with_queue(queue, delay, DelayProxy, performable_method )
       else
         ::Resque::Job.create(queue, DelayProxy, performable_method)
       end
@@ -30,7 +30,7 @@ module ResqueDelay
       end
 
       def delay
-        @delay ||= @options[:in] && (::Time.now + @options[:in])
+        @delay ||= @options[:in]
       end
   end
 
