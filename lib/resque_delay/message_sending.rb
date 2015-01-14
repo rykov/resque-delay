@@ -4,7 +4,7 @@ module ResqueDelay
     def initialize(target, options)
       @target = target
       @options = options
-      if @options[:in].not_nil? && !@options[:in].kind_of?(::Fixnum)
+      if @options[:in].present? && !@options[:in].kind_of?(::Fixnum)
         raise ::ArgumentError.new("Delayed settings must be a Fixnum! not a #{@options[:in].class.name}") 
       end
     end
@@ -21,7 +21,11 @@ module ResqueDelay
 
     # Called asynchrously by Resque
     def self.perform(args)
-      PerformableMethod.new(*args).perform
+      if args.respond_to?(:[])
+        PerformableMethod.new(args["object"], args["method"], args["args"])
+      else
+        PerformableMethod.new(*args).perform
+      end
     end
 
     private

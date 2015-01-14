@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
   s.files            += Dir.glob("spec/**/*")
 
   s.add_dependency    "resque", ">= 1.9"
-  s.add_dependency    "activerecord", ">= 2.3"
 
   s.description = <<DESCRIPTION
 Enable send_later support for Resque

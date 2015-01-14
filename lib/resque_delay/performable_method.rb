@@ -24,9 +24,12 @@ module ResqueDelay
 
     def perform
       load(object).send(method, *args.map{|a| load(a)})
-    rescue ActiveRecord::RecordNotFound
-      # We cannot do anything about objects which were deleted in the meantime
-      true
+    rescue => e
+      if defined?(ActiveRecord) && e.kind_of?(ActiveRecord::RecordNotFound)
+        true
+      else
+        raise
+      end
     end
 
     private
@@ -40,10 +43,12 @@ module ResqueDelay
     end
 
     def dump(arg)
-      case arg
-      when Class, Module      then class_to_string(arg)
-      when ActiveRecord::Base then ar_to_string(arg)
-      else arg
+      if arg.kind_of?(Class) || arg.kind_of?(Module)
+        class_to_string(arg)
+      elsif defined?(ActiveRecord) && arg.kind_of?(ActiveRecord::Base)
+        ar_to_string(arg)
+      else
+        arg
       end
     end
 
