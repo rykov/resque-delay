@@ -4,7 +4,7 @@ module ResqueDelay
     AR_STRING_FORMAT    = /^AR\:([A-Z][\w\:]+)\:(\d+)$/
 
     def self.create(object, method, args)
-      raise NoMethodError, "undefined method `#{method}' for #{object.inspect}" unless object.respond_to?(method)
+      raise NoMethodError, "undefined method `#{method}' for #{object.inspect}" unless object.respond_to?(method, true)
       self.new(object, method, args)
     end
 
