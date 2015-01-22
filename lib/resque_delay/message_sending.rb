@@ -22,7 +22,7 @@ module ResqueDelay
     # Called asynchrously by Resque
     def self.perform(args)
       if args.respond_to?(:[])
-        PerformableMethod.new(args["object"], args["method"], args["args"])
+        PerformableMethod.new(args["object"], args["method"], args["args"]).perform
       else
         PerformableMethod.new(*args).perform
       end
