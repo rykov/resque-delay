@@ -2,7 +2,7 @@ module ResqueDelay
   class PerformableMethod < Struct.new(:object, :method, :args)
     CLASS_STRING_FORMAT = /^CLASS\:([A-Z][\w\:]+)$/
     AR_STRING_FORMAT    = /^AR\:([A-Z][\w\:]+)\:(\d+)$/
-    DM_STRING_FORMAT    = /^DM\:([A-Z][\w\:]+)\:(\d+)$/
+    DM_STRING_FORMAT    = /^DM\:((?:[A-Z][a-zA-z]+)(?:\:\:[A-Z][a-zA-z]+)*)\:([\d\:]+)$/
 
     def self.create(object, method, args)
       raise NoMethodError, "undefined method `#{method}' for #{object.inspect}" unless object.respond_to?(method, true)
@@ -43,7 +43,7 @@ module ResqueDelay
       case arg
       when CLASS_STRING_FORMAT then $1.constantize
       when AR_STRING_FORMAT    then $1.constantize.find($2)
-      when DM_STRING_FORMAT    then $1.constantize.get!($2)
+      when DM_STRING_FORMAT    then $1.constantize.get!(*$2.split(':'))
       else arg
       end
     end
@@ -65,7 +65,7 @@ module ResqueDelay
     end
 
     def dm_to_string(obj)
-      "DM:#{obj.class}:#{obj.id}"
+      "DM:#{obj.class}:#{obj.key.join(':')}"
     end
 
     def class_to_string(obj)
