@@ -19,7 +19,7 @@ module ResqueDelay
       end
     end
 
-    # Called asynchrously by Resque
+    # Called asynchronously by Resque
     def self.perform(args)
       if args.respond_to?(:[])
         PerformableMethod.new(args["object"], args["method"], args["args"]).perform
@@ -29,13 +29,14 @@ module ResqueDelay
     end
 
     private
-      def delay?
-        delay.to_i > 0
-      end
 
-      def delay
-        @delay ||= @options[:in]
-      end
+    def delay?
+      delay.to_i > 0
+    end
+
+    def delay
+      @delay ||= @options[:in]
+    end
   end
 
   module MessageSending

@@ -25,12 +25,9 @@ module ResqueDelay
     end
 
     def perform
-      load(object).send(method, *args.map{|a| load(a)})
+      load(object).send(method, *args.map { |a| load(a) })
     rescue => e
       if defined?(ActiveRecord) && e.kind_of?(ActiveRecord::RecordNotFound)
-        true
-      elsif defined?(DataMapper) && e.kind_of?(DataMapper::ObjectNotFoundError)
-        Resque.logger.debug "PerformableMethod#perform: #{e}"
         true
       else
         raise
