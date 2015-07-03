@@ -1,18 +1,20 @@
 module ResqueDelay
-  class PerformableMethod < Struct.new(:object, :method, :args)
+  class PerformableMethod < Struct.new(:object, :method, :args, :queue, :run_in)
     CLASS_STRING_FORMAT = /^CLASS\:([A-Z][\w\:]+)$/
     AR_STRING_FORMAT    = /^AR\:([A-Z][\w\:]+)\:(\d+)$/
     DM_STRING_FORMAT    = /^DM\:((?:[A-Z][a-zA-z]+)(?:\:\:[A-Z][a-zA-z]+)*)\:([\d\:]+)$/
 
-    def self.create(object, method, args)
+    def self.create(object, method, args, queue, run_in)
       raise NoMethodError, "undefined method `#{method}' for #{object.inspect}" unless object.respond_to?(method, true)
-      self.new(object, method, args)
+      self.new(object, method, args, queue, run_in)
     end
 
-    def initialize(object, method, args)
+    def initialize(object, method, args, queue, run_in)
       self.object = dump(object)
       self.args   = args.map { |a| dump(a) }
       self.method = method.to_sym
+      self.queue = queue
+      self.run_in = run_in
     end
 
     def display_name
