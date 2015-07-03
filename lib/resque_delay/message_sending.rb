@@ -1,49 +1,47 @@
 require 'active_support/basic_object'
-
 module ResqueDelay
   class DelayProxy < ActiveSupport::BasicObject
     def initialize(target, options)
       @target = target
       @options = options
+      if @options[:in].present? && !@options[:in].kind_of?(::Fixnum)
+        raise ::ArgumentError.new("Delayed settings must be a Fixnum! not a #{@options[:in].class.name}") 
+      end
     end
 
     def method_missing(method, *args)
       queue = @options[:to] || :default
       performable_method = PerformableMethod.create(@target, method, args)
-      ::Resque::Job.create(queue, DelayProxy, performable_method)
+      if delay?
+        ::Resque.enqueue_in_with_queue(queue, delay, DelayProxy, performable_method )
+      else
+        ::Resque::Job.create(queue, DelayProxy, performable_method)
+      end
     end
 
-    # Called asynchrously by Resque
+    # Called asynchronously by Resque
     def self.perform(args)
-      PerformableMethod.new(*args).perform
+      if args.respond_to?(:[])
+        PerformableMethod.new(args["object"], args["method"], args["args"]).perform
+      else
+        PerformableMethod.new(*args).perform
+      end
+    end
+
+    private
+
+    def delay?
+      delay.to_i > 0
+    end
+
+    def delay
+      @delay ||= @options[:in]
     end
   end
 
   module MessageSending
     def delay(options = {})
       DelayProxy.new(self, options)
-    end
-    alias __delay__ delay
-
-    #def send_later(method, *args)
-    #  warn "[DEPRECATION] `object.send_later(:method)` is deprecated. Use `object.delay.method"
-    #  __delay__.__send__(method, *args)
-    #end
-    #
-    #def send_at(time, method, *args)
-    #  warn "[DEPRECATION] `object.send_at(time, :method)` is deprecated. Use `object.delay(:run_at => time).method"
-    #  __delay__(:run_at => time).__send__(method, *args)
-    #end
-
-    module ClassMethods
-      def handle_asynchronously(method)
-        aliased_method, punctuation = method.to_s.sub(/([?!=])$/, ''), $1
-        with_method, without_method = "#{aliased_method}_with_delay#{punctuation}", "#{aliased_method}_without_delay#{punctuation}"
-        define_method(with_method) do |*args|
-          delay.__send__(without_method, *args)
-        end
-        alias_method_chain method, :delay
-      end
     end
   end
 end
