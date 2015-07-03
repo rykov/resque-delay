@@ -5,7 +5,7 @@ resque-delay
 
 Requires the resque gem.
 
-Allows to call .send_later or .delay.method on objects ala DelayedJob
+Allows to call .send_later or .delay.method on objects à la DelayedJob
 
 
 Installation
