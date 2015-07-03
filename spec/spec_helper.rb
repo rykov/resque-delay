@@ -1,7 +1,9 @@
 require 'rubygems'
 $TESTING=true
-$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'resque'
+require 'coveralls'
+Coveralls.wear!
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 
 Spec::Matchers.define :have_key do |expected|
   match do |redis|
