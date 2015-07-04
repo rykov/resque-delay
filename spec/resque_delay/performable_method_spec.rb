@@ -3,16 +3,13 @@ require 'logger'
 require 'active_record'
 require 'data_mapper'
 require 'resque-delay'
+require 'mongoid'
 
 describe 'performable_method' do
   
   class TheARecord < ActiveRecord::Base
     def play
       @played = true
-    end
-    
-    def played?
-      @played ||= false
     end
   end
   
@@ -21,9 +18,12 @@ describe 'performable_method' do
     def play
       @played = true
     end
-    
-    def played?
-      @played ||= false
+  end
+  
+  class TheMongoid 
+    include Mongoid::Document
+    def play
+      @played = true
     end
   end
   
@@ -53,24 +53,41 @@ describe 'performable_method' do
   
   let(:dm_key) { 'DM:TheDataMapper:1:2' }
   
+  let(:mg) {
+    mg = instance_double("TheMongoid")
+    allow(mg).to receive(:kind_of?).and_return(false)
+    allow(mg).to receive(:kind_of?).with(Mongoid::Document).and_return(true)
+    allow(mg).to receive(:id).and_return(1)
+    allow(mg).to receive(:class).and_return(TheMongoid)
+    mg
+  } 
+  
+  let(:mg_key) {'MG:TheMongoid:1'}
+  
   before(:each) do
     allow(TheARecord).to receive(:find).with("1").and_return(ar)
     allow(TheDataMapper).to receive('get!'.to_sym).with("1","2").and_return(dm)
+    allow(TheMongoid).to receive(:find).with("1").and_return(mg)
   end
   
   describe '.dump' do
     it 'returns AR name' do
-      pm = ResqueDelay::PerformableMethod.new(nil, :play, [], nil, nil)
+      pm = ResqueDelay::PerformableMethod.new(ar, :play, [], nil, nil)
       expect(pm.send(:dump, ar)).to eq(ar_key)
     end
     
     it 'returns DM name' do
-      pm = ResqueDelay::PerformableMethod.new(nil, :play, [], nil, nil)
+      pm = ResqueDelay::PerformableMethod.new(dm, :play, [], nil, nil)
       expect(pm.send(:dump, dm)).to eq(dm_key)
     end
     
+    it 'returns MG name' do
+      pm = ResqueDelay::PerformableMethod.new(mg, :play, [], nil, nil)
+      expect(pm.send(:dump, mg)).to eq(mg_key)
+    end
+    
     it 'returns Class name' do
-      pm = ResqueDelay::PerformableMethod.new(nil, :to_s, [], nil, nil)
+      pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
       expect(pm.send(:dump, klass)).to eq(klass_key)
     end
   end
@@ -83,6 +100,10 @@ describe 'performable_method' do
     it 'prints DMs' do
       pm = ResqueDelay::PerformableMethod.new(dm, :play, [], nil, nil)
       expect(pm.display_name).to eq('TheDataMapper#play')
+    end
+    it 'prints MGs' do
+      pm = ResqueDelay::PerformableMethod.new(mg, :play, [], nil, nil)
+      expect(pm.display_name).to eq('TheMongoid#play')
     end
     it 'prints Classes' do
       pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
@@ -102,6 +123,10 @@ describe 'performable_method' do
     it 'loads DMs' do
       pm = ResqueDelay::PerformableMethod.new(dm, :play, [], nil, nil)
       expect(pm.send(:load, dm_key)).to eq(dm)
+    end
+    it 'loads MGs' do
+      pm = ResqueDelay::PerformableMethod.new(mg, :play, [], nil, nil)
+      expect(pm.send(:load, mg_key)).to eq(mg)
     end
     it 'loads Classes' do
       pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)

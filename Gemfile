@@ -12,4 +12,5 @@ group :development, :test do
   gem 'activerecord'
   gem 'activesupport'
   gem 'data_mapper'
+  gem 'mongoid'
 end

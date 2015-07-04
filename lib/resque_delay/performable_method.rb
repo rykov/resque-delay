@@ -2,9 +2,7 @@ module ResqueDelay
   class PerformableMethod < Struct.new(:object, :method, :args, :queue, :run_in)
     CLASS_STRING_FORMAT = /^CLASS\:([A-Z][\w\:]+)$/
     AR_STRING_FORMAT    = /^AR\:([A-Z][\w\:]+)\:(\d+)$/
-
     DM_STRING_FORMAT    = /^DM\:((?:[A-Z][a-zA-z]+)(?:\:\:[A-Z][a-zA-z]+)*)\:([\d\:]+)$/
-
     MG_STRING_FORMAT    = /^MG\:([A-Z][\w\:]+)\:(\w+)$/
     
     def self.create(object, method, args, queue, run_in)
@@ -63,8 +61,8 @@ module ResqueDelay
         ar_to_string(arg)
       elsif defined?(DataMapper) && arg.kind_of?(DataMapper::Resource)
         dm_to_string(arg)
-      elsif defined?(Mongoid) && arg.is_a?(Mongoid::Document)
-          mg_to_string(arg)          
+      elsif defined?(Mongoid) && arg.kind_of?(Mongoid::Document)
+        mg_to_string(arg)          
       else
         arg
       end
