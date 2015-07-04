@@ -17,10 +17,6 @@ module ResqueDelay
       self.queue = queue
       self.run_in = run_in
     end
-    
-    def resque_args
-      [object, method, args]
-    end
 
     def display_name
       case self.object
