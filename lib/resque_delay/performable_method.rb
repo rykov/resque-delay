@@ -17,6 +17,10 @@ module ResqueDelay
       self.run_in = run_in
     end
 
+    def resque_args
+      [object, method, args]
+    end
+
     def display_name
       case self.object
       when CLASS_STRING_FORMAT then "#{$1}.#{method}"
