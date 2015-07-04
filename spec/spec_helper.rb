@@ -5,7 +5,7 @@ require 'resque'
 require 'resque-scheduler'
 require 'coveralls'
 Coveralls.wear!
-SimpleCov.minimum_coverage 90
+SimpleCov.minimum_coverage 100
 SimpleCov.refuse_coverage_drop
 
 
