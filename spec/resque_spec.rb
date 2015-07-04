@@ -42,8 +42,15 @@ describe "resque" do
     it 'fails if in option is not valid' do
       expect do
         job = FairyTail.delay(in: 'I will fail').to_s
-      end.to raise_error { ::ArgumentError }
+      end.to raise_error(::ArgumentError)
     end
-    
+  end
+  
+  describe 'self.perform' do
+    it 'sends perform with a hash' do
+      obj = "hello"
+      expect(obj).to receive(:to_s)
+      ResqueDelay::DelayProxy.perform({ 'object' => obj, 'method' => :to_s, 'args' => []})
+    end
   end
 end

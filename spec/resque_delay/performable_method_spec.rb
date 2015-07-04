@@ -88,6 +88,10 @@ describe 'performable_method' do
       pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
       expect(pm.display_name).to eq('Fixnum.to_s')
     end
+    it 'prints Unknowns' do
+      pm = ResqueDelay::PerformableMethod.new("I'm not exptected", :to_s, [], nil, nil)
+      expect(pm.display_name).to eq('Unknown#to_s')
+    end
   end
   
   describe '.load' do
@@ -103,23 +107,40 @@ describe 'performable_method' do
       pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
       expect(pm.send(:load, klass_key)).to eq(klass)
     end
+    it 'loads other' do
+      obj = 'hello'
+      pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
+      expect(pm.send(:load, obj)).to eq(obj)
+    end
   end
   
   describe '.perform' do
-    it 'execute the method' do
+    it 'executes AR methods' do
       pm = ResqueDelay::PerformableMethod.new(ar, :play, [], nil, nil)
       expect(ar).to receive(:play)
       pm.perform
     end
-    it 'loads DMs' do
+    it 'executes DM methods' do
       pm = ResqueDelay::PerformableMethod.new(dm, :play, [], nil, nil)
       expect(dm).to receive(:play)
       pm.perform
     end
-    it 'loads Classes' do
+    it 'executes Class methods' do
       pm = ResqueDelay::PerformableMethod.new(klass, :to_s, [], nil, nil)
       expect(klass).to receive(:to_s)
       pm.perform
+    end
+    it 'eats ActiveRecord::NotFound exceptions' do
+      pm = ResqueDelay::PerformableMethod.new(ar, :play, [], nil, nil)
+      expect(ar).to receive(:play).and_raise(ActiveRecord::RecordNotFound)
+      pm.perform
+    end
+    it 'does NOT eat exceptions other than ActiveRecord::NotFound' do
+      expect do
+        pm = ResqueDelay::PerformableMethod.new(ar, :play, [], nil, nil)
+        expect(ar).to receive(:play).and_raise(::RuntimeError)
+        pm.perform
+      end.to raise_error(::RuntimeError)
     end
   end
 end
