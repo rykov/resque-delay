@@ -16,9 +16,9 @@ module ResqueDelay
       performable_method = PerformableMethod.create(@target, method, args, queue, run_in)
       ::Resque::Job.new(queue, performable_method)
       if delay?
-        ::Resque.enqueue_in_with_queue(queue, delay, DelayProxy, performable_method )
+        ::Resque.enqueue_in_with_queue(queue, delay, DelayProxy, performable_method)
       else
-        ::Resque::Job.create(queue, DelayProxy, performable_method.resque_args)
+        ::Resque::Job.create(queue, DelayProxy, performable_method)
       end
       performable_method
     end

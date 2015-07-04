@@ -7,9 +7,6 @@ describe "resque" do
     class FairyTail
       attr_accessor :happy_ending
       def self.princesses; end
-      def tell
-        @happy_ending = true
-      end
     end
     
     before do
@@ -47,10 +44,18 @@ describe "resque" do
   end
   
   describe 'self.perform' do
-    it 'sends perform with a hash' do
+    it 'sends perform when argument responds to :[]' do
       obj = "hello"
       expect(obj).to receive(:to_s)
       ResqueDelay::DelayProxy.perform({ 'object' => obj, 'method' => :to_s, 'args' => []})
+    end
+    
+    it 'sends perform when argument does NOT respond to :[]' do
+      obj = "hello"
+      args = [obj, :to_s, [], nil, nil]
+      expect(obj).to receive(:to_s)
+      expect(args).to receive('respond_to?').with(:[]).and_return(false)
+      ResqueDelay::DelayProxy.perform(args)
     end
   end
 end
