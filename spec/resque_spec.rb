@@ -39,5 +39,11 @@ describe "resque" do
       end.to change { Resque.delayed_queue_schedule_size }.by(1)
     end
     
+    it 'fails if in option is not valid' do
+      expect do
+        job = FairyTail.delay(in: 'I will fail').to_s
+      end.to raise_error { ::ArgumentError }
+    end
+    
   end
 end

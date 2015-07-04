@@ -5,6 +5,9 @@ require 'resque'
 require 'resque-scheduler'
 require 'coveralls'
 Coveralls.wear!
+SimpleCov.minimum_coverage 90
+SimpleCov.refuse_coverage_drop
+
 
 RSpec::Matchers.define :have_key do |expected|
   match do |redis|
